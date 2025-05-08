@@ -17,13 +17,13 @@ import matplotlib.pyplot as plt
 
 # Функция для минимизации
 def f(x, y):
-    return (x - 2) ** 2 + (y - 3) ** 2 + x * y
+    return np.sin(x) * np.cos(y / 2)
 
 
 # Частные производные (градиент)
 def grad_f(x, y):
-    df_dx = 2 * (x - 2) + y
-    df_dy = 2 * (y - 3) + x
+    df_dx = np.cos(x) * np.cos(y / 2)
+    df_dy = -0.5 * np.sin(x) * np.sin(y / 2)
     return np.array([df_dx, df_dy])
 
 
@@ -88,7 +88,7 @@ def steepest_gradient_descent(f, grad_f, x0, y0, eps=1e-3, a=-5, b=5, c=-5, d=5)
 
 def main():
     # Получение данных от пользователя
-    print("\n--- Программа для минимизации функции f(x,y) = (x-2)²+(y-3)²+xy ---")
+    print("\n--- Программа для минимизации функции f(x,y) = sin(x)*cos(y/2) ---")
 
     try:
         epsilon = float(input("Введите точность (epsilon): "))
@@ -101,7 +101,7 @@ def main():
         method_choice = int(input("Ваш выбор (1 или 2): "))
 
         # Границы для визуализации и расчетов
-        a, b, c, d = -5, 5, -5, 5
+        a, b, c, d = -7, 7, -7, 7
 
         # Выполнение выбранного метода
         if method_choice == 1:
