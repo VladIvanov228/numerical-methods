@@ -1,25 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import simpson
 
-
+# Решение СЛАУ методом Гаусса с выбором ведущего элемента
 def solve_linear_system(A, B):
-    """
-    Решение СЛАУ методом Гаусса с выбором ведущего элемента
-    """
     n = len(B)
     AB = np.hstack([A.astype('float64'), B.reshape(-1, 1).astype('float64')])
 
     # Прямой ход
     for i in range(n):
-        # Выбор ведущего элемента в столбце i
         max_row = np.argmax(np.abs(AB[i:n, i])) + i
         AB[[i, max_row]] = AB[[max_row, i]]
-
-        # Нормализация текущей строки
         AB[i] = AB[i] / AB[i, i]
-
-        # Обнуление элементов ниже ведущего
         for k in range(i + 1, n):
             AB[k] -= AB[k, i] * AB[i]
 
@@ -30,24 +21,21 @@ def solve_linear_system(A, B):
 
     return x
 
-
 # Параметры задачи
 a, b = 0, 1
 h = 1e-5
 
+def p(t):
+    return 0
 
-def p(t): return 0
+def q(t):
+    return -2
 
-
-def q(t): return -2
-
-
-def f(t): return -t ** 2
-
+def f(t):
+    return -t ** 2
 
 def phi(i, t):
     return t ** i * (1 - t)
-
 
 def derivative(f, t, h, order=1):
     if order == 1:
@@ -55,12 +43,13 @@ def derivative(f, t, h, order=1):
     elif order == 2:
         return (f(t - h) - 2 * f(t) + f(t + h)) / h ** 2
 
-
 def L(phi_func, t):
-    return (derivative(lambda x: derivative(phi_func, x, h, 1), t, h, 2)
+    return (derivative(lambda x: derivative(phi_func, x, h, 1), t, h, 1)
             + p(t) * derivative(phi_func, t, h, 1)
             + q(t) * phi_func(t))
 
+def trapezoidal_rule(y, x):
+    return np.trapz(y, x)
 
 def build_system(N):
     t = np.linspace(a, b, 1000)
@@ -72,25 +61,25 @@ def build_system(N):
         for j in range(N):
             phi_j = lambda t: phi(j + 1, t)
             integrand = [L(phi_j, tk) * phi_i(tk) for tk in t]
-            A[i, j] = simpson(integrand, t)
+            A[i, j] = trapezoidal_rule(integrand, t)
 
         f_phi = [f(tk) * phi_i(tk) for tk in t]
-        B[i] = simpson(f_phi, t)
+        B[i] = trapezoidal_rule(f_phi, t)
 
     return A, B
 
+N = int(input("Введите N: "))  # Можно изменить на любое целое число
 
-# Основная программа
-N = int(input("Введите N: "))
 A, B = build_system(N)
 C = solve_linear_system(A, B)
 
 t_plot = np.linspace(a, b, 100)
 x = sum(C[i] * phi(i + 1, t_plot) for i in range(N))
 
-plt.plot(t_plot, x)
+plt.plot(t_plot, x, color='cyan', linewidth=3)
 plt.xlabel('t')
 plt.ylabel('x(t)')
 plt.title('Приближенное решение методом Галеркина')
 plt.grid(True)
 plt.show()
+
